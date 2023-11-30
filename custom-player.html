@@ -135,8 +135,10 @@
 
             // Wait for metadata to load to get video duration
             player.on('loadedmetadata', function () {
-              addSegmentMarkers(segments);
               populateSegmentList(segments);
+            });
+            player.on('play', function () {
+              addSegmentMarkers(segments);
               var seekBar = player.controlBar.progressControl.seekBar.el();
 
               // Create playhead
@@ -150,7 +152,6 @@
                 playhead.style.left = Math.min(percent * 100, 100) + '%';
               });
             });
-
             function addSegmentMarkers(segments) {
               var duration = player.duration();
               segments = generateCompleteSegments(segments, duration);
