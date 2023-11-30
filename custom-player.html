@@ -165,7 +165,7 @@
               seekBar.style.backgroundColor = 'transparent';
 
               segments.forEach(function (segment) {
-                var totalWidth = seekBar.offsetWidth;
+                var totalWidth = seekBar.getBoundingClientRect().width;
                 console.log(segment, duration, totalWidth);
                 // Calculate the width of the segment in pixels
                 var segmentWidth =
