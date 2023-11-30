@@ -31,8 +31,16 @@
         border-radius: 3px;
         visibility: hidden;
         opacity: 0;
-        transition: opacity 0.3s;
+        transition: opacity 0.3s, transform 0.3s;
         z-index: 1;
+        font-family: 'Arial', sans-serif;
+        font-size: 15px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        bottom: 125%;
+        left: 50%;
+        transform: translateX(-50%);
+        white-space: nowrap;
+        margin-bottom: 10px;
       }
       .vjs-segment-marker:hover .custom-tooltip {
         visibility: visible;
@@ -54,7 +62,12 @@
     </div>
     <ul class="segment-list" id="segmentList"></ul>
     <script>
-      function generateCompleteSegments(userSegments, videoLength) {
+      var segmentMarkersAdded = false;
+      function generateCompleteSegments(
+        userSegments,
+        videoLength,
+        defaultTitle = 'Video about html'
+      ) {
         // Sort user segments by start time
         userSegments.sort((a, b) => a.start - b.start);
 
@@ -66,7 +79,7 @@
           completeSegments.push({
             start: 0,
             end: userSegments[0].start,
-            title: '',
+            title: defaultTitle,
           });
         }
 
@@ -83,7 +96,7 @@
               completeSegments.push({
                 start: lastEnd,
                 end: nextSegment.start,
-                title: '',
+                title: defaultTitle,
               });
             }
           }
@@ -94,7 +107,7 @@
           completeSegments.push({
             start: lastEnd,
             end: videoLength,
-            title: '', // maybe here add the default video title,
+            title: defaultTitle, // maybe here add the default video title,
           });
         }
 
@@ -125,6 +138,7 @@
           });
 
           player.ready(function () {
+            var playhead = document.createElement('div');
             player.tech(true).on('keystatuschange', function (event) {
               console.log('event: ', event);
             });
@@ -136,21 +150,26 @@
             // Wait for metadata to load to get video duration
             player.on('loadedmetadata', function () {
               populateSegmentList(segments);
-            });
-            player.on('play', function () {
-              addSegmentMarkers(segments);
-              var seekBar = player.controlBar.progressControl.seekBar.el();
-
-              // Create playhead
-              var playhead = document.createElement('div');
-              playhead.classList.add('playhead');
-
-              seekBar.appendChild(playhead);
-
               player.on('timeupdate', () => {
                 var percent = player.currentTime() / player.duration();
                 playhead.style.left = Math.min(percent * 100, 100) + '%';
               });
+            });
+            player.on('play', function () {
+              if (!segmentMarkersAdded) {
+                addSegmentMarkers(segments);
+                segmentMarkersAdded = true;
+
+                var seekBar = player.controlBar.progressControl.seekBar.el();
+                // Create playhead
+
+                playhead.classList.add('playhead');
+                seekBar.appendChild(playhead);
+              }
+            });
+            player.on('timeupdate', () => {
+              var percent = player.currentTime() / player.duration();
+              playhead.style.left = Math.min(percent * 100, 100) + '%';
             });
             function addSegmentMarkers(segments) {
               var duration = player.duration();
@@ -158,21 +177,14 @@
               var seekBar = player.controlBar.progressControl.seekBar.el();
               var playhead = document.createElement('div');
               playhead.classList.add('playhead');
-
-              // Append to seek bar
               seekBar.appendChild(playhead);
               seekBar.innerHTML = '';
-
               seekBar.style.backgroundColor = 'transparent';
 
               segments.forEach(function (segment) {
                 var totalWidth = seekBar.getBoundingClientRect().width;
-                console.log(segment, duration, totalWidth);
-                // Calculate the width of the segment in pixels
                 var segmentWidth =
                   ((segment.end - segment.start) / duration) * totalWidth;
-                console.log(segmentWidth);
-                // Create the segment element
                 var segmentElement = document.createElement('div');
                 segmentElement.classList.add('vjs-segment-marker');
                 segmentElement.style.position = 'absolute';
@@ -182,22 +194,16 @@
                 segmentElement.style.height = '100%';
                 segmentElement.style.backgroundColor = 'grey';
                 segmentElement.style.boxSizing = 'border-box';
-                // Add title as a tooltip
                 var tooltip = document.createElement('div');
                 tooltip.classList.add('custom-tooltip');
                 tooltip.textContent = segment.title;
                 segmentElement.appendChild(tooltip);
-
-                // Append the segment to the seek bar
                 seekBar.appendChild(segmentElement);
-
-                // Add an event listener for clicking on the segment
                 segmentElement.addEventListener('click', function () {
                   player.currentTime(segment.start);
                 });
               });
             }
-
             window.scrollToSegment = function (index) {
               if (segments[index]) {
                 player.currentTime(segments[index].start);
@@ -214,7 +220,7 @@
                 listItem.style.cursor = 'pointer';
                 listItem.style.textDecoration = 'underline';
                 listItem.addEventListener('click', function () {
-                  player.currentTime(segment.start);
+                  scrollToSegment(index);
                 });
 
                 segmentList.appendChild(listItem);
