@@ -21,6 +21,7 @@
         height: 100%;
         background-color: transparent;
         cursor: pointer;
+        z-index: 2;
       }
 
       .custom-tooltip {
@@ -252,7 +253,7 @@
                   index !== segments.length - 1
                     ? `${segmentWidth - 3}px`
                     : `${segmentWidth}px`;
-                segmentElement.style.backgroundColor = 'grey';
+                segmentElement.style.backgroundColor = '#00000091';
                 segmentElement.style.boxSizing = 'border-box';
                 var tooltip = document.createElement('div');
                 tooltip.classList.add('custom-tooltip');
