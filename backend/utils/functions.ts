@@ -87,7 +87,6 @@ const generateThumbnail = (
   });
 };
 
-// ... existing code for uploadThumbnailToCloudinary and getVideoMetadata
 
 const notifyWebhook = async (webhookUrl: string, data: any) => {
   try {
