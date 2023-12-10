@@ -1,14 +1,14 @@
 #!/bin/bash
 
 # Variables
-FILE_PATH="/mnt/g/Download/1701981138823-Screen-Recording-2023-12-06-at-10.22.15-PM.mp4"
+FILE_PATH="/mnt/g/Download/1701981138823-Screen-Recording-2023-12-06-at-10.22.15-PM.mp4" #file
 ORIGINAL_FILE_NAME=$(basename "$FILE_PATH")
 CHUNK_SIZE_MB=100
 CHUNK_SIZE_BYTES=$(($CHUNK_SIZE_MB * 1024 * 1024)) # 100 MB in bytes
 CHUNK_PREFIX="chunk"
-SERVER_URL="http://172.29.1.90:3000/"
+SERVER_URL="https://api-videothumb-hsingh.avrean.net/upload"
 FILE_ID="1234"
-WEBHOOK_URL="http://172.29.1.90:3000/video"
+WEBHOOK_URL="http://172.29.1.90:3000/video" # provide url where to be notified
 MIN_CHUNK_SIZE_BYTES=1000000 # Minimum chunk size to send (1 MB)
 
 # Calculate the total file size in bytes

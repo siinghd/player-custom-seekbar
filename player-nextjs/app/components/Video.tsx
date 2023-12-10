@@ -12,10 +12,16 @@ import {
   formatTime,
   getCurrentSegmentName,
 } from '../utils/methods';
-import { Thumbnail } from '../../../backend/types';
 import { Segment } from '../utils/types';
 import Player from 'video.js/dist/types/player';
 import { MdClose, MdMenu } from 'react-icons/md';
+export interface Thumbnail {
+  public_id: string;
+  version: number;
+  url: string;
+  secure_url: string;
+  timestamp: number;
+}
 
 interface VideoProps {
   thumbnails: Thumbnail[];
