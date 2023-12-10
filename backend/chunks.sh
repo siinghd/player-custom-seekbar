@@ -42,6 +42,13 @@ for file in ${CHUNK_PREFIX}*; do
     --form "totalChunks=$TOTAL_CHUNKS" \
     --form "originalFileName=\"$ORIGINAL_FILE_NAME\"" \
     --form "video=@$file"
+  # Check if curl command was successful
+  if [ $? -eq 0 ]; then
+    echo "Chunk $COUNT sent successfully. Removing $file..."
+    rm -f "$file"
+  else
+    echo "Failed to send chunk $COUNT. Keeping $file for retry."
+  fi
 done
 
 echo "All chunks sent."
