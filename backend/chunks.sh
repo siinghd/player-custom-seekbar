@@ -3,7 +3,7 @@
 # Variables
 FILE_PATH="/mnt/g/Download/1701981138823-Screen-Recording-2023-12-06-at-10.22.15-PM.mp4" #file
 ORIGINAL_FILE_NAME=$(basename "$FILE_PATH")
-CHUNK_SIZE_MB=100
+CHUNK_SIZE_MB=90 # just to be sure its less then 100mb... for cloudflare
 CHUNK_SIZE_BYTES=$(($CHUNK_SIZE_MB * 1024 * 1024)) # 100 MB in bytes
 CHUNK_PREFIX="chunk"
 SERVER_URL="https://api-videothumb.hsingh.site/upload"
