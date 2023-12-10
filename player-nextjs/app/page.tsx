@@ -5,8 +5,8 @@ import Video from './components/Video';
 export default async function Home() {
   let data = null;
   try {
-    data = await (
-      await fetch('https://videothumb-hsingh.avrean.net/video?fileId=1234')
+    data = await(
+      await fetch('https://api-videothumb.hsingh.site/video?fileId=1234')
     ).json();
   } catch (error) {
     data = null;
