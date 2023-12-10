@@ -34,7 +34,7 @@ Before installing, ensure Bun.js is available on your system.
     ```
 ## Usage
 
-Start the system using the command:
+Start the server using the command:
 
 ```
 bun run out/app.js
