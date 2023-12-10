@@ -14,12 +14,18 @@ dependencies:
   react-dom:
     specifier: ^18
     version: 18.2.0(react@18.2.0)
+  react-icons:
+    specifier: ^4.12.0
+    version: 4.12.0(react@18.2.0)
   video.js:
     specifier: ^8.6.1
     version: 8.6.1
   videojs-contrib-eme:
     specifier: ^3.11.1
     version: 3.11.1
+  videojs-mobile-ui:
+    specifier: ^1.1.1
+    version: 1.1.1(video.js@8.6.1)
 
 devDependencies:
   '@types/node':
@@ -2249,6 +2255,14 @@ packages:
       scheduler: 0.23.0
     dev: false
 
+  /react-icons@4.12.0(react@18.2.0):
+    resolution: {integrity: sha512-IBaDuHiShdZqmfc/TwHu6+d6k2ltNCf3AszxNmjJc1KUfXdEeRJOKyNvLmAHaarhzGmTSVygNdyu8/opXv2gaw==}
+    peerDependencies:
+      react: '*'
+    dependencies:
+      react: 18.2.0
+    dev: false
+
   /react-is@16.13.1:
     resolution: {integrity: sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==}
     dev: true
@@ -2761,6 +2775,16 @@ packages:
 
   /videojs-font@4.1.0:
     resolution: {integrity: sha512-X1LuPfLZPisPLrANIAKCknZbZu5obVM/ylfd1CN+SsCmPZQ3UMDPcvLTpPBJxcBuTpHQq2MO1QCFt7p8spnZ/w==}
+    dev: false
+
+  /videojs-mobile-ui@1.1.1(video.js@8.6.1):
+    resolution: {integrity: sha512-q7vx74++bqu2763Tc/GG4qFcMt42emC8uXe/z+zFVpBIiysgAf89AgorE6m30YHWtVJWgbRIyzFVYNOxCk9qow==}
+    engines: {node: '>=14', npm: '>=6'}
+    peerDependencies:
+      video.js: ^8
+    dependencies:
+      global: 4.4.0
+      video.js: 8.6.1
     dev: false
 
   /videojs-vtt.js@0.15.5:

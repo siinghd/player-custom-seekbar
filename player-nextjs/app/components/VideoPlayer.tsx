@@ -1,9 +1,11 @@
 'use client';
 import React, { useEffect, useRef, FunctionComponent } from 'react';
 import videojs, { ReadyCallback } from 'video.js';
+import Player from 'video.js/dist/types/player';
 import 'video.js/dist/video-js.css';
 import 'videojs-contrib-eme';
-
+import 'videojs-mobile-ui/dist/videojs-mobile-ui.css';
+import 'videojs-mobile-ui';
 // todo correct types
 interface VideoPlayerProps {
   options: any;
@@ -15,7 +17,7 @@ export const VideoPlayer: FunctionComponent<VideoPlayerProps> = ({
   onReady,
 }) => {
   const videoRef = useRef<HTMLDivElement>(null);
-  const playerRef = useRef<any | null>(null);
+  const playerRef = useRef<Player | null>(null);
   useEffect(() => {
     if (!playerRef.current && videoRef.current) {
       const videoElement = document.createElement('video-js');
@@ -26,16 +28,11 @@ export const VideoPlayer: FunctionComponent<VideoPlayerProps> = ({
         videoElement,
         options,
         () => {
+          player.mobileUi(); // mobile ui #https://github.com/mister-ben/videojs-mobile-ui
           player.eme(); // Initialize EME
           player.on('loadedmetadata', () => {
-            const duration = player.duration();
-            if (duration > 0) {
-              console.log('Video Duration:', duration);
-              if (onReady) {
-                onReady(player);
-              }
-            } else {
-              console.log('Duration not available yet');
+            if (onReady) {
+              onReady(player);
             }
           });
         }
@@ -52,7 +49,6 @@ export const VideoPlayer: FunctionComponent<VideoPlayerProps> = ({
 
   useEffect(() => {
     const player = playerRef.current;
-
     return () => {
       if (player && !player.isDisposed()) {
         player.dispose();
@@ -64,10 +60,6 @@ export const VideoPlayer: FunctionComponent<VideoPlayerProps> = ({
   return (
     <div data-vjs-player>
       <div ref={videoRef} />
-      <div
-        id="thumbnail-preview"
-        className="hidden absolute bg-no-repeat bg-cover"
-      ></div>
     </div>
   );
 };

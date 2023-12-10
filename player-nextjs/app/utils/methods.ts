@@ -1,4 +1,6 @@
+import Player from 'video.js/dist/types/player';
 import { Segment } from './types';
+import videojs from 'video.js';
 
 const formatTime = (seconds: number): string => {
   const date = new Date(seconds * 1000);
@@ -52,75 +54,42 @@ const generateCompleteSegments = (
 
   return completeSegments;
 };
+const createSegmentMarkerElements = (
+  player: Player,
+  segment: Segment,
+  lastSegment: Segment
+) => {
+  const segmentEnd = isFinite(segment.end)
+    ? (segment.end / (player.duration() || lastSegment.end)) * 100
+    : 100;
+
+  // Create gap element
+  const gapEl = document.createElement('div');
+  gapEl.className = 'segment-gap absolute bg-[#222932b3] h-full w-[3px]';
+  gapEl.style.left = `${segmentEnd}%`;
+
+  return { gapEl };
+};
+
 const createSegmentMarkers = (player: any, allSegments: Segment[]) => {
   const seekBar = player.controlBar.progressControl.seekBar.el();
+  const fragment = document.createDocumentFragment();
 
-  // Clear existing segments and tooltips
   seekBar
     .querySelectorAll('.segment-marker, .segment-tooltip')
-    .forEach((el) => el.remove());
+    .forEach((el: HTMLElement) => el.remove());
 
-  allSegments.forEach((segment) => {
-    // Create segment element
-    const gapEl = document.createElement('div');
-    gapEl.classList.add(
-      'segment-gap',
-      'absolute',
-      'bg-[#515151]',
-      'h-full',
-      'w-[3px]'
-    );
-    const segmentEl = document.createElement('div');
-    segmentEl.classList.add(
-      'segment-marker',
-      'absolute',
-      'bg-transparent',
-      'h-full',
-      'z-10'
+  allSegments.forEach((segment: Segment) => {
+    const { gapEl } = createSegmentMarkerElements(
+      player,
+      segment,
+      allSegments[allSegments.length - 1]
     );
 
-    // Calculate width and left position of the segment
-    const segmentStart = (segment.start / player.duration()) * 100;
-    const segmentEnd = isFinite(segment.end)
-      ? (segment.end / player.duration()) * 100
-      : 100;
-    segmentEl.style.width = `${segmentEnd - segmentStart}%`;
-    segmentEl.style.left = `${segmentStart}%`;
-
-    // Create tooltip element
-    const tooltipEl = document.createElement('div');
-    tooltipEl.classList.add(
-      'segment-tooltip',
-      'absolute',
-      'bottom-10',
-      'bg-gray-600',
-      'text-white',
-      'text-xs',
-      'px-2',
-      'py-1',
-      'rounded',
-      'opacity-0',
-      'transition-opacity',
-      'w-[100%]'
-    );
-    tooltipEl.textContent = segment.title;
-
-    // Show and hide tooltip on hover
-    segmentEl.addEventListener('mouseenter', () => {
-      tooltipEl.classList.replace('opacity-0', 'opacity-100');
-    });
-    segmentEl.addEventListener('mouseleave', () => {
-      tooltipEl.classList.replace('opacity-100', 'opacity-0');
-    });
-
-    const gapStart = (segment.end / player.duration()) * 100;
-    // Append tooltip to the segment element
-    segmentEl.appendChild(tooltipEl);
-    seekBar.appendChild(segmentEl);
-
-    gapEl.style.left = `${gapStart}%`;
-    seekBar.appendChild(gapEl);
+    fragment.appendChild(gapEl);
   });
+
+  seekBar.appendChild(fragment);
 };
 
 const createSegmentMarkersWithoutDuration = (
@@ -128,77 +97,43 @@ const createSegmentMarkersWithoutDuration = (
   allSegments: Segment[]
 ) => {
   const seekBar = player.controlBar.progressControl.seekBar.el();
+  const fragment = document.createDocumentFragment();
 
-  // Clear existing segments and tooltips
   seekBar
     .querySelectorAll('.segment-marker, .segment-tooltip')
-    .forEach((el) => el.remove());
+    .forEach((el: any) => el.remove());
 
   allSegments.forEach((segment) => {
-    // Create segment element
-    const gapEl = document.createElement('div');
-    gapEl.classList.add(
-      'segment-gap',
-      'absolute',
-      'bg-[#515151]',
-      'h-full',
-      'w-[3px]'
+    const { gapEl } = createSegmentMarkerElements(
+      player,
+      segment,
+      allSegments[allSegments.length - 1]
     );
-    const segmentEl = document.createElement('div');
-    segmentEl.classList.add(
-      'segment-marker',
-      'absolute',
-      'bg-transparent',
-      'h-full',
-      'z-10'
-    );
-    const duration = allSegments[allSegments.length - 1].end;
-    // Calculate width and left position of the segment
-    const segmentStart = (segment.start / duration) * 100;
-    const segmentEnd = isFinite(segment.end)
-      ? (segment.end / duration) * 100
-      : 100;
-    segmentEl.style.width = `${segmentEnd - segmentStart}%`;
-    segmentEl.style.left = `${segmentStart}%`;
 
-    // Create tooltip element
-    const tooltipEl = document.createElement('div');
-    tooltipEl.classList.add(
-      'segment-tooltip',
-      'absolute',
-      'bottom-10',
-      'bg-gray-600',
-      'text-white',
-      'text-xs',
-      'px-2',
-      'py-1',
-      'rounded',
-      'opacity-0',
-      'transition-opacity',
-      'w-[100%]'
-    );
-    tooltipEl.textContent = segment.title;
-
-    // Show and hide tooltip on hover
-    segmentEl.addEventListener('mouseenter', () => {
-      tooltipEl.classList.replace('opacity-0', 'opacity-100');
-    });
-    segmentEl.addEventListener('mouseleave', () => {
-      tooltipEl.classList.replace('opacity-100', 'opacity-0');
-    });
-
-    const gapStart = (segment.end / duration) * 100;
-    // Append tooltip to the segment element
-    segmentEl.appendChild(tooltipEl);
-    seekBar.appendChild(segmentEl);
-
-    gapEl.style.left = `${gapStart}%`;
-    seekBar.appendChild(gapEl);
+    fragment.appendChild(gapEl);
   });
+
+  seekBar.appendChild(fragment);
 };
+const convertTimeToSeconds = (timeStr: string): number => {
+  return timeStr.split(':').reduce((acc, time) => 60 * acc + +time, 0);
+};
+
+const getCurrentSegmentName = (
+  timeStr: string,
+  segments: Segment[]
+): string => {
+  const timeInSeconds = convertTimeToSeconds(timeStr);
+  const currentSegment = segments.find(
+    (segment) => segment.start <= timeInSeconds && timeInSeconds <= segment.end
+  );
+  return currentSegment ? currentSegment.title : '';
+};
+
 export {
   formatTime,
   generateCompleteSegments,
   createSegmentMarkers,
   createSegmentMarkersWithoutDuration,
+  getCurrentSegmentName,
 };
