@@ -14,7 +14,7 @@ This system is designed to efficiently generate preview thumbnails for large vid
 
 ## Installation
 
-Before installing, ensure Node.js and npm are available on your system.
+Before installing, ensure Bun.js is available on your system.
 
 1. **Clone the Repository**: 
    ```
