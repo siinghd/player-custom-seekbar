@@ -1,4 +1,4 @@
-import { unlink, exists, mkdir } from 'node:fs/promises';
+import { exists, mkdir } from 'node:fs/promises';
 import { VideoData } from '../types';
 import cloudinary from '../config/cloudinary';
 import { UploadApiResponse } from 'cloudinary';
@@ -7,8 +7,8 @@ import Ffmpeg from 'fluent-ffmpeg';
 import ConcurrencyLimit from '../ConcurrencyLimit';
 import { rm } from 'node:fs/promises';
 
-const thumbnailsDir = path.join(import.meta.dir, '../thumbnails');
-const uploadsDir = path.join(import.meta.dir, '../uploads');
+const thumbnailsDir = path.join(import.meta.dir, './thumbnails');
+await mkdir(thumbnailsDir, { recursive: true }).catch(console.error);
 const limit = new ConcurrencyLimit<any>(10);
 
 const getVideoMetadata = (videoPath: string): Promise<any> => {
@@ -57,7 +57,7 @@ const generateThumbnails = async (
     if (!(await exists(videoThumbnailDir))) {
       await mkdir(videoThumbnailDir);
     }
-    const videoPath = path.join(uploadsDir, `../${videoData.path}`);
+    const videoPath = videoData.path
     const metadata = await getVideoMetadata(videoPath);
     const duration: number = metadata.format.duration || 0;
     const uploadPromises: Promise<UploadApiResponse>[] = [];

@@ -7,7 +7,7 @@ import videoInfo, { VideoStatus } from './models/videoInfo';
 import connectWithDb from './config/db';
 import { VideoData } from './types';
 
-const uploadDir = './uploads';
+const uploadDir = join(import.meta.dir, './uploads');
 await mkdir(uploadDir, { recursive: true }).catch(console.error);
 interface ExtendedVideo extends VideoData {
   retries: 0;
@@ -58,9 +58,7 @@ const processChunk = async (
   originalName: string
 ) => {
   const chunkDir = join(uploadDir, fileId);
-  try {
-    await mkdir(chunkDir);
-  } catch (error) {}
+  await mkdir(chunkDir, { recursive: true }).catch(console.error);
 
   const chunkPath = join(chunkDir, chunkIndex.toString());
   await Bun.write(chunkPath, await video.arrayBuffer());
@@ -109,11 +107,11 @@ const handleUpload = async (request: Request): Promise<Response> => {
     return new Response('Missing required data', { status: 400 });
   }
 
-  const videoInf = await videoInfo.findOne({ fileId }).lean();
+  const videoInf = await videoInfo.findOne({ fileId });
   if (videoInf && videoInf.status !== VideoStatus.Pending) {
     if (videoInf.status === VideoStatus.Errored) {
       videoInf.status = VideoStatus.Pending;
-      await videoInf.save();
+      await videoInf.save(); // wont work with lean
     } else {
       return new Response(
         'Video is already being processed, or already done, stop sending chunks',
@@ -186,6 +184,9 @@ const processVideo = async (videoData: ExtendedVideo): Promise<void> => {
       queue.enqueue(videoData); // Re-enqueue the video for retry
     } else {
       await updateVideoInfoAndNotify(videoData, thumbnails || []);
+      await rm(videoData.path, {
+        recursive: true,
+      });
     }
   });
 };
@@ -193,6 +194,7 @@ const processVideo = async (videoData: ExtendedVideo): Promise<void> => {
 const checkForVideosToProcess = async (): Promise<void> => {
   while (!queue.isEmpty()) {
     const videoData = queue.dequeue();
+
     if (!videoData) continue;
 
     try {
@@ -206,10 +208,10 @@ const checkForVideosToProcess = async (): Promise<void> => {
   }
 };
 // queue.enqueue({
-//   path: './1701981138823-Screen-Recording-2023-12-06-at-10.22.15-PM.mp4',
+//   path: './uploads/1234_1701981138823-Screen-Recording-2023-12-06-at-10.22.15-PM.mp4',
 //   delta: 30,
 //   webhook: 'http://172.29.1.90:3001/video',
-//   fileId: '121212',
+//   fileId: '1234',
 //   retries: 0,
 // });
 
