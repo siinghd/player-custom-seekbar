@@ -27,6 +27,16 @@ const videoInfoSchema: mongoose.Schema = new mongoose.Schema(
     delta: {
       type: Number,
     },
+    isComposite: {
+      type: Boolean,
+      default: true,
+    },
+    width: {
+      type: Number,
+    },
+    height: {
+      type: Number,
+    },
   },
   { timestamps: true }
 );

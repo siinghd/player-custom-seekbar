@@ -5,17 +5,17 @@ import Video from './components/Video';
 export default async function Home() {
   let data = null;
   try {
-    data = await(
+    data = await (
       await fetch('https://api-videothumb.hsingh.site/video?fileId=1234')
     ).json();
   } catch (error) {
     data = null;
   }
-
+ 
   return (
     <main className="">
       <Video
-        thumbnails={data ? data.videoInfo.thumbnails : []}
+        thumbnails={data ? data.thumbnails : []}
         segments={[
           { start: 0, end: 10, title: 'starting the life circle' },
           { start: 10, end: 20, title: 'CSS' },
@@ -28,6 +28,11 @@ export default async function Home() {
           },
         ]}
         videoJsOptions={{
+          thumbnail: data.isComposite ? data.thumbnails[0] : null,
+          isComposite: data.isComposite,
+          height: data.height,
+          width: data.width,
+          delta: data.delta,
           autoplay: true,
           controls: true,
           responsive: true,

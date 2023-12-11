@@ -6,10 +6,11 @@ import 'video.js/dist/video-js.css';
 import 'videojs-contrib-eme';
 import 'videojs-mobile-ui/dist/videojs-mobile-ui.css';
 import 'videojs-mobile-ui';
+import 'videojs-sprite-thumbnails';
 // todo correct types
 interface VideoPlayerProps {
   options: any;
-  onReady?: (player: any) => void;
+  onReady?: (player: Player) => void;
 }
 
 export const VideoPlayer: FunctionComponent<VideoPlayerProps> = ({
@@ -30,6 +31,14 @@ export const VideoPlayer: FunctionComponent<VideoPlayerProps> = ({
         () => {
           player.mobileUi(); // mobile ui #https://github.com/mister-ben/videojs-mobile-ui
           player.eme(); // Initialize EME
+          if (options.isComposite) {
+            player.spriteThumbnails({
+              interval: options.delta,
+              url: options.thumbnail.secure_url,
+              width: options.width,
+              height: options.height,
+            });
+          }
           player.on('loadedmetadata', () => {
             if (onReady) {
               onReady(player);

@@ -8,6 +8,9 @@ export interface VideoData {
   fileId: string;
   delta: number;
   webhook: string;
+  isComposite: boolean;
+  height: number;
+  width: number;
 }
 
 export interface Thumbnail {

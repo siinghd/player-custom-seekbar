@@ -25,7 +25,7 @@ body {
     )
     rgb(var(--background-start-rgb));
 }
-.vjs-time-tooltip {
+/* .vjs-time-tooltip {
   white-space: nowrap;
   max-width: none;
-}
+} */

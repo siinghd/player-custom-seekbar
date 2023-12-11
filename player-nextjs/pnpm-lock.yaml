@@ -26,6 +26,9 @@ dependencies:
   videojs-mobile-ui:
     specifier: ^1.1.1
     version: 1.1.1(video.js@8.6.1)
+  videojs-sprite-thumbnails:
+    specifier: ^2.1.1
+    version: 2.1.1
 
 devDependencies:
   '@types/node':
@@ -2782,6 +2785,14 @@ packages:
     engines: {node: '>=14', npm: '>=6'}
     peerDependencies:
       video.js: ^8
+    dependencies:
+      global: 4.4.0
+      video.js: 8.6.1
+    dev: false
+
+  /videojs-sprite-thumbnails@2.1.1:
+    resolution: {integrity: sha512-FxfVlkZgz/Ux6IFDwAj8eKiytzKstlIs1dOSDzAxHdSLYbDXbAoHfUgciH0lxwfaWjq2tg4q996efSC69dvG7A==}
+    engines: {node: '>=14', npm: '>=6'}
     dependencies:
       global: 4.4.0
       video.js: 8.6.1

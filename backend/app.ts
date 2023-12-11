@@ -6,6 +6,7 @@ import { UploadApiResponse } from 'cloudinary';
 import videoInfo, { VideoStatus } from './models/videoInfo';
 import connectWithDb from './config/db';
 import { VideoData } from './types';
+import { HEIGHT, WIDTH } from './utils/constats';
 
 const uploadDir = join(import.meta.dir, './uploads');
 await mkdir(uploadDir, { recursive: true }).catch(console.error);
@@ -38,10 +39,12 @@ async function handleGetVideo(request: Request): Promise<Response> {
   return videoInf
     ? Response.json(
         {
-          videoInfo: {
-            fileId: videoInf.fileId,
-            thumbnails: videoInf.thumbnails,
-          },
+          fileId: videoInf.fileId,
+          thumbnails: videoInf.thumbnails,
+          delta: videoInf.delta,
+          height: videoInf.height,
+          width: videoInf.width,
+          isComposite: videoInf.isComposite,
         },
         { status: 200 }
       )
@@ -55,7 +58,10 @@ const processChunk = async (
   chunkIndex: string,
   video: File,
   totalChunks: number,
-  originalName: string
+  originalName: string,
+  isComposite: boolean,
+  width: number,
+  height: number
 ) => {
   const chunkDir = join(uploadDir, fileId);
   await mkdir(chunkDir, { recursive: true }).catch(console.error);
@@ -83,6 +89,9 @@ const processChunk = async (
       webhook: webhook,
       fileId,
       retries: 0,
+      isComposite,
+      height,
+      width,
     });
     await rm(chunkDir, {
       recursive: true,
@@ -101,6 +110,10 @@ const handleUpload = async (request: Request): Promise<Response> => {
   const delta = Math.max(parseInt(formData.get('delta') as string) || 10);
   const chunkIndex = formData.get('chunkIndex') as string;
   const totalChunks = parseInt(formData.get('totalChunks') as string);
+  const compositeValue = formData.get('composite');
+  const isComposite = compositeValue !== null ? Boolean(compositeValue) : true;
+  const width = parseInt(formData.get('width') as string) || WIDTH;
+  const height = parseInt(formData.get('height') as string) || HEIGHT;
   const video = formData.get('video') as File;
 
   if (!fileId || !originalFileName || !video || !chunkIndex || !totalChunks) {
@@ -119,6 +132,18 @@ const handleUpload = async (request: Request): Promise<Response> => {
       );
     }
   }
+  if (!videoInf) {
+    await videoInfo.create({
+      delta: delta,
+      webhook,
+      status: VideoStatus.Pending,
+      fileId: fileId,
+      thumbnails: [],
+      isComposite,
+      height,
+      width,
+    });
+  }
   await processChunk(
     fileId,
     webhook,
@@ -126,7 +151,10 @@ const handleUpload = async (request: Request): Promise<Response> => {
     chunkIndex,
     video,
     totalChunks,
-    originalFileName
+    originalFileName,
+    isComposite,
+    height,
+    width
   );
   return new Response('Chunk received.');
 };
@@ -141,6 +169,11 @@ const updateVideoInfoAndNotify = async (
       {
         $set: {
           status: VideoStatus.Done,
+          delta: videoData.delta,
+          webhook: videoData.webhook,
+          isComposite: videoData.isComposite,
+          height: videoData.height,
+          width: videoData.width,
           thumbnails: thumbnails.map((t) => ({
             public_id: t.public_id,
             version: t.version,
@@ -184,9 +217,9 @@ const processVideo = async (videoData: ExtendedVideo): Promise<void> => {
       queue.enqueue(videoData); // Re-enqueue the video for retry
     } else {
       await updateVideoInfoAndNotify(videoData, thumbnails || []);
-      await rm(videoData.path, {
-        recursive: true,
-      });
+      // await rm(videoData.path, {
+      //   recursive: true,
+      // });
     }
   });
 };
@@ -207,13 +240,16 @@ const checkForVideosToProcess = async (): Promise<void> => {
     }
   }
 };
-// queue.enqueue({
-//   path: './uploads/1234_1701981138823-Screen-Recording-2023-12-06-at-10.22.15-PM.mp4',
-//   delta: 30,
-//   webhook: 'http://172.29.1.90:3001/video',
-//   fileId: '1234',
-//   retries: 0,
-// });
+queue.enqueue({
+  path: './uploads/santurini.mp4',
+  delta: 10,
+  webhook: 'http://172.29.1.90:3001/video',
+  fileId: '1234',
+  retries: 0,
+  isComposite: true,
+  width: WIDTH,
+  height: HEIGHT,
+});
 
 connectWithDb(() => {
   setInterval(() => {
