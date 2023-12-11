@@ -8,7 +8,7 @@
 
 ## Implementation
 
-[Details on how to implement or integrate this feature]
+Do look at each section
 
 # Next.js Frontend
 
