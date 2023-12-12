@@ -217,9 +217,9 @@ const processVideo = async (videoData: ExtendedVideo): Promise<void> => {
       queue.enqueue(videoData); // Re-enqueue the video for retry
     } else {
       await updateVideoInfoAndNotify(videoData, thumbnails || []);
-      // await rm(videoData.path, {
-      //   recursive: true,
-      // });
+      await rm(videoData.path, {
+        recursive: true,
+      });
     }
   });
 };
@@ -240,16 +240,16 @@ const checkForVideosToProcess = async (): Promise<void> => {
     }
   }
 };
-queue.enqueue({
-  path: './uploads/santurini.mp4',
-  delta: 10,
-  webhook: 'http://172.29.1.90:3001/video',
-  fileId: '1234',
-  retries: 0,
-  isComposite: true,
-  width: WIDTH,
-  height: HEIGHT,
-});
+// queue.enqueue({
+//   path: './uploads/santurini.mp4',
+//   delta: 10,
+//   webhook: 'http://172.29.1.90:3001/video',
+//   fileId: '1234',
+//   retries: 0,
+//   isComposite: true,
+//   width: WIDTH,
+//   height: HEIGHT,
+// });
 
 connectWithDb(() => {
   setInterval(() => {
