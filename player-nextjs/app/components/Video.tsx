@@ -28,6 +28,40 @@ interface VideoProps {
   segments: Segment[];
   videoJsOptions: any;
 }
+function ThumbnailComponent({
+  startTime,
+  endTime,
+  thumbWidth,
+  thumbHeight,
+  deltaTime,
+  imageUrl,
+}: {
+  startTime: number;
+  endTime: number;
+  thumbWidth: number;
+  thumbHeight: number;
+  deltaTime: number;
+  imageUrl: string;
+  }) {
+  const scaleFactor = 0.75; 
+  // Calculate the midpoint of the segment
+  const midpoint = (startTime + endTime) / 2;
+  // Calculate the index of the thumbnail based on the segment midpoint
+  const index = Math.floor(midpoint / deltaTime); // Rounding down to get to the closest 10-second mark
+  // Calculate the x-coordinate for the background position
+  const xPos = -(index * thumbWidth);
+  const scaledWidth = thumbWidth * scaleFactor;
+  const scaledHeight = thumbHeight * scaleFactor;
+  // Inline styles for the thumbnail div
+  const styles = {
+    width: `${scaledWidth}px`,
+    height: `${scaledHeight}px`,
+    backgroundImage: `url(${imageUrl})`,
+    backgroundPosition: `${xPos}px 0px`,
+  };
+
+  return <div style={styles} />;
+}
 const Video: FunctionComponent<VideoProps> = ({
   thumbnails,
   segments,
@@ -262,6 +296,7 @@ const Video: FunctionComponent<VideoProps> = ({
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
+
   return (
     <div className="flex md:flex-row flex-col-reverse">
       {/* Sidebar */}
@@ -287,10 +322,27 @@ const Video: FunctionComponent<VideoProps> = ({
 
         <ul className={`${isSidebarOpen ? 'block' : 'hidden'} md:block`}>
           {segments.map((segment, index) => (
-            <li key={index} className="mb-2">
+            <li
+              key={index}
+              className="flex mb-2 items-center space-x-2 cursor-pointer hover:bg-blue-100"
+              onClick={() => scrollTopSegment(index)}
+            >
+              <div className="shrink-0">
+                <ThumbnailComponent
+                  startTime={segment.start}
+                  endTime={segment.end}
+                  thumbWidth={videoJsOptions.width}
+                  thumbHeight={videoJsOptions.height}
+                  imageUrl={videoJsOptions.thumbnail.secure_url}
+                  deltaTime={videoJsOptions.delta}
+                />
+              </div>
+
               <button
-                className="w-full text-left hover:bg-blue-100"
-                onClick={() => scrollTopSegment(index)}
+                className="flex-grow text-left transition-colors duration-150 ease-in-out"
+                onClick={() =>
+                  console.log('Navigating to segment:', segment.title)
+                } // Replace with your actual navigation function
               >
                 {formatTime(segment.start)} - {formatTime(segment.end)} -{' '}
                 {segment.title}
