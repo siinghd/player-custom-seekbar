@@ -25,7 +25,7 @@ Bun.serve({
         return new Response('ok');
     }
   },
-  port: 3000,
+  port: process.env.PORT || 3000,
 });
 
 async function handleGetVideo(request: Request): Promise<Response> {
