@@ -42,17 +42,17 @@ function ThumbnailComponent({
   thumbHeight: number;
   deltaTime: number;
   imageUrl: string;
-  }) {
-  const scaleFactor = 0.75; 
-  // Calculate the midpoint of the segment
+}) {
+  const scaleFactor = 0.75;
+  // middle time of the segments
   const midpoint = (startTime + endTime) / 2;
-  // Calculate the index of the thumbnail based on the segment midpoint
+  // index of the thumbnail
   const index = Math.floor(midpoint / deltaTime); // Rounding down to get to the closest 10-second mark
-  // Calculate the x-coordinate for the background position
+  //  the x-coordinate for the background position
   const xPos = -(index * thumbWidth);
   const scaledWidth = thumbWidth * scaleFactor;
   const scaledHeight = thumbHeight * scaleFactor;
-  // Inline styles for the thumbnail div
+  // inline  styles for the thumbnail div
   const styles = {
     width: `${scaledWidth}px`,
     height: `${scaledHeight}px`,
@@ -62,6 +62,66 @@ function ThumbnailComponent({
 
   return <div style={styles} />;
 }
+
+type TimeCodeCommentProps = {
+  comment: string;
+  scrollToTime: (time: number) => void;
+};
+const TimeCodeComment: React.FC<TimeCodeCommentProps> = ({
+  comment,
+  scrollToTime,
+}) => {
+  // convert the time to seconds
+  const convertToSeconds = (timeCode: string): number => {
+    const parts = timeCode.split(':').reverse().map(Number);
+    return parts.reduce(
+      (acc, part, index) => acc + part * Math.pow(60, index),
+      0
+    );
+  };
+
+  // we need to match time in the comments hh:mm:ss, mm:ss, or ss time codes
+  const timeCodeRegex = /(\d{1,2}:)?(\d{1,2}:)?(\d{1,2})/g;
+
+  const elements = [];
+  let lastIndex = 0;
+  let match;
+
+  while ((match = timeCodeRegex.exec(comment)) !== null) {
+    // Aif there is something before the time
+    if (match.index > lastIndex) {
+      elements.push(
+        <span key={`text-${lastIndex}`}>
+          {comment.substring(lastIndex, match.index)}
+        </span>
+      );
+    }
+
+    // Convert the time code to seconds and create a clickable button
+    const timeInSeconds = convertToSeconds(match[0]);
+    elements.push(
+      <button
+        key={`timecode-${match.index}`}
+        className="text-blue-500 hover:underline"
+        onClick={() => scrollToTime(timeInSeconds)}
+      >
+        {match[0]}
+      </button>
+    );
+    //keeps track of the last index in the comment string after the last time code match.
+    lastIndex = match.index + match[0].length;
+  }
+
+  // text after the last match
+  if (lastIndex < comment.length) {
+    elements.push(
+      <span key={`text-end-${lastIndex}`}>{comment.substring(lastIndex)}</span>
+    );
+  }
+
+  return <p>{elements}</p>;
+};
+
 const Video: FunctionComponent<VideoProps> = ({
   thumbnails,
   segments,
@@ -74,7 +134,9 @@ const Video: FunctionComponent<VideoProps> = ({
   const [currentThumbnail, setCurrentThumbnail] = useState<string | null>(null);
   const [isPlayerReady, setIsPlayerReady] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-
+  const comment = '2:40 what is that?';
+  const comment2 = ' Hi harkirat is that you at 40?';
+  const comment3 = ' Hi harkiratcan re explain this at 1:50 in another video?';
   // const getThumbnailSize = () => {
   //   const isMobile = window.innerWidth <= 768; // Example breakpoint for mobile
   //   return isMobile ? { width: 160, height: 90 } : { width: 320, height: 180 }; // Half size for mobile
@@ -293,6 +355,13 @@ const Video: FunctionComponent<VideoProps> = ({
       playerRef.current.currentTime(segmentStartTime);
     }
   };
+  const scrollToTime = (time: number) => {
+    if (playerRef.current) {
+      // Access the player API to set the current time to the start of the segment
+
+      playerRef.current.currentTime(time);
+    }
+  };
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
@@ -338,12 +407,7 @@ const Video: FunctionComponent<VideoProps> = ({
                 />
               </div>
 
-              <button
-                className="flex-grow text-left transition-colors duration-150 ease-in-out"
-                onClick={() =>
-                  console.log('Navigating to segment:', segment.title)
-                } // Replace with your actual navigation function
-              >
+              <button className="flex-grow text-left transition-colors duration-150 ease-in-out">
                 {formatTime(segment.start)} - {formatTime(segment.end)} -{' '}
                 {segment.title}
               </button>
@@ -361,6 +425,9 @@ const Video: FunctionComponent<VideoProps> = ({
           className="hidden absolute bg-no-repeat bg-cover w-[320px] h-[180px] pointer-events-none z-10"
         />
         <VideoPlayer options={videoJsOptions} onReady={handlePlayerReady} />
+        <TimeCodeComment comment={comment} scrollToTime={scrollToTime} />
+        <TimeCodeComment comment={comment2} scrollToTime={scrollToTime} />
+        <TimeCodeComment comment={comment3} scrollToTime={scrollToTime} />
 
         {/* Open Sidebar Button (Floating Bottom Right) */}
         {!isSidebarOpen && (
