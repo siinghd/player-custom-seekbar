@@ -30,7 +30,7 @@ Before installing, ensure Bun.js is available on your system.
 3. **Configuration**: Set up necessary configurations in the `.env` file, including database credentials, server ports, etc.
 4.  **Build**: 
     ```
-        bun build app.ts
+        bun build ./app.ts --target bun --outdir ./out
     ```
 ## Usage
 
