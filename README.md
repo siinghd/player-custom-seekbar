@@ -1,5 +1,5 @@
 # player-custom-seekbar
-
+https://player-nextjs-siinghd-player-custom-seekbar-x.hsingh.site/
 ## Requirements
 
 - Integration with the existing codebase to support segmented seekbars, similar to YouTube.
